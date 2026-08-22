@@ -42,8 +42,12 @@ live differs:
 ```powershell
   cd $env:USERPROFILE\dev\claude-commands-skills
   git pull
-  Compress-Archive -Path skills\<skill-name>\* -DestinationPath "<skill-name>.zip" -Force
+  cd skills\<skill-name>
+  tar -a -c -f ..\..\<skill-name>.zip *
+  cd ..\..
 ```
+  Use `tar`, not `Compress-Archive` — the latter can write backslash path
+  separators on Windows that claude.ai's upload validator rejects.
   Upload one skill = one zip; don't bundle multiple skills into one
   upload, and only re-upload skills you actually changed.
 

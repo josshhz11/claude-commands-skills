@@ -84,7 +84,20 @@ directory) and re-upload it via **Settings → Features**:
 ```powershell
 cd $env:USERPROFILE\dev\claude-commands-skills
 git pull
-Compress-Archive -Path skills\<skill-name>\* -DestinationPath "<skill-name>.zip" -Force
+cd skills\<skill-name>
+tar -a -c -f ..\..\<skill-name>.zip *
+cd ..\..
+```
+Note: use `tar`, not `Compress-Archive` — on Windows, `Compress-Archive`
+sometimes writes nested-folder paths with backslashes instead of forward
+slashes, which claude.ai's upload validator rejects as "invalid
+characters" in the path. `tar` (built into Windows 10/11) writes correct
+forward-slash paths. Verify the zip's contents if in doubt:
+```powershell
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$zip = [System.IO.Compression.ZipFile]::OpenRead("<skill-name>.zip")
+$zip.Entries | ForEach-Object { $_.FullName }
+$zip.Dispose()
 ```
 Then upload `<skill-name>.zip`. Only needed for skills you actually changed.
 
