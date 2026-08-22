@@ -124,10 +124,14 @@ confirming and running it.
   "doesn't have one yet" formatting across sections would be inconsistent -
   plain sequential numbering works uniformly for both and doesn't create a
   dependency on the commit having actually happened.
-- Produce the summary in exactly this format, one `##` section per commit,
-  oldest first:
+- Output the PR summary as a single copy-pasteable block, wrapped in its own
+  fenced code block (use four backticks for the outer fence so the `##`/`#`
+  lines inside render as literal text, not as headings in the chat) - the
+  same way the git commands in Step 2/3 are shown, so the user can copy the
+  raw markdown as-is rather than getting it rendered. One `##` section per
+  commit, oldest first, in exactly this format:
 
-```
+````
 # PR Summary
 
 ## Commit 1: <what the commit does, a few words>
@@ -137,7 +141,7 @@ confirming and running it.
 ## Commit 2: <...>
 
 - ...
-```
+````
 
 Keep bullets concrete and specific (name the actual file/function/behavior
 that changed) - not generic restatements of the commit header.
