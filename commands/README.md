@@ -84,3 +84,7 @@ setup on a new machine.
   a small set of them) from the current repo's actual diff, then — once
   real commits exist on the branch — a PR summary from real commit
   history. Never pushes, never opens a PR on its own.
+- `new-branch.md` (`/new-branch`) — creates a new branch named
+  `<type>/<YY.MM>_<slug>`, computing the date at runtime and defaulting to
+  `feature` unless $ARGUMENTS specifies another recognized type. Checks
+  out the branch directly — no go-ahead needed, unlike `commit-pr.md`.
