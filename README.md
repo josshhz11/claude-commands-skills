@@ -7,31 +7,90 @@ you use it on. It's distinct from a project's own `.claude/commands/` or
 project's repo, and are meant to be shared with teammates on that project.
 Nothing in this repo should be project-specific.
 
-## How this stays in sync across machines
-
-This repo lives on GitHub and is cloned locally as
-`claude-commands-skills/`. Claude Code, however, looks for commands and
-skills at fixed paths - `~/.claude/commands/` and `~/.claude/skills/` -
-not wherever this repo happens to be cloned. To bridge that, each machine
-has two OS-level directory junctions:
-
-```
-~/.claude/commands  →  claude-commands-skills/commands
-~/.claude/skills    →  claude-commands-skills/skills
-```
-
-So editing a file through `~/.claude/commands/` and editing it through
-this repo's `commands/` folder are the same file - the junction just
-means Claude Code doesn't need to know this repo exists. Pull the repo,
-and both `~/.claude/commands` and `~/.claude/skills` show the update
-immediately, no copy step.
-
 ## Structure
 
-- [`commands/`](commands/) - custom slash commands (`/name`, manually
-  invoked). See [commands/README.md](commands/README.md) for how a
-  command file works, first-time setup, and publishing changes.
-- [`skills/`](skills/) - Claude skills (auto-invoked by Claude based on
-  the task). See [skills/README.md](skills/README.md) for how a skill
-  differs from a command and how syncing works on claude.ai vs. Claude
-  Code.
+```
+claude-commands-skills/
+├── README.md ← this file
+├── commands/ ← custom slash commands, see commands/README.md
+└── skills/ ← Claude skills, see skills/README.md
+```
+
+## How this stays in sync across machines
+
+This repo lives on GitHub (`josshhz11/claude-commands-skills`) and is
+cloned locally to `~/dev/claude-commands-skills/`. Claude Code, however,
+looks for commands and skills at fixed paths — `~/.claude/commands/` and
+`~/.claude/skills/` — not wherever this repo happens to be cloned. Each
+machine bridges that with two OS-level directory junctions:
+
+```
+~/.claude/commands → ~/dev/claude-commands-skills/commands
+~/.claude/skills → ~/dev/claude-commands-skills/skills
+```
+
+A junction makes the two paths the same folder on disk — editing through
+either path edits the same files, and `git` run from either path sees the
+same repo. Once set up, `git pull` in the repo folder updates both
+`~/.claude/commands` and `~/.claude/skills` immediately, with no copy step.
+
+## First-time setup on a new machine
+
+```powershell
+# 1. Clone the repo
+git clone https://github.com/josshhz11/claude-commands-skills.git "$env:USERPROFILE\dev\claude-commands-skills"
+
+# 2. Create the two junctions (no admin rights needed)
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\commands" -Target "$env:USERPROFILE\dev\claude-commands-skills\commands"
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills" -Target "$env:USERPROFILE\dev\claude-commands-skills\skills"
+
+# 3. Verify — both should list the real subfolder contents
+Get-ChildItem "$env:USERPROFILE\.claude\commands"
+Get-ChildItem "$env:USERPROFILE\.claude\skills"
+```
+
+If `~/.claude/commands` or `~/.claude/skills` already exist as real
+folders (not junctions) on that machine — e.g. an old pre-restructure
+setup — move or delete them first; `New-Item -ItemType Junction` won't
+overwrite an existing folder at that path.
+
+## Publishing a change (from whichever machine you edited on)
+
+```powershell
+cd $env:USERPROFILE\dev\claude-commands-skills
+git add -A
+git commit -m "add: <name> - <what it does>"
+git push
+```
+
+## Pulling the latest (on any machine, before relying on something new)
+
+```powershell
+cd $env:USERPROFILE\dev\claude-commands-skills
+git pull
+```
+No auto-sync — do this before a session where you might rely on a
+recently added/changed command or skill. Because both `~/.claude/commands`
+and `~/.claude/skills` are junctions into this folder, the pulled changes
+appear there automatically.
+
+## Working with a skill on claude.ai (web)
+
+Claude Code picks up skill changes on the next `git pull`, no extra step.
+claude.ai has no direct access to this git repo, so after changing a
+skill, zip that skill's folder specifically (not the whole `skills/`
+directory) and re-upload it via **Settings → Features**:
+
+```powershell
+cd $env:USERPROFILE\dev\claude-commands-skills
+git pull
+Compress-Archive -Path skills\<skill-name>\* -DestinationPath "<skill-name>.zip" -Force
+```
+Then upload `<skill-name>.zip`. Only needed for skills you actually changed.
+
+## Details
+
+- [`commands/README.md`](commands/README.md) — how a command file works,
+  writing conventions, commands currently in this repo.
+- [`skills/README.md`](skills/README.md) — commands vs. skills, folder
+  shape, skills currently in this repo.
