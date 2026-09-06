@@ -88,3 +88,9 @@ setup on a new machine.
   `<type>/<YY.MM>_<slug>`, computing the date at runtime and defaulting to
   `feature` unless $ARGUMENTS specifies another recognized type. Checks
   out the branch directly — no go-ahead needed, unlike `commit-pr.md`.
+- `memory-update.md` (`/memory-update`) — finds a project's decisions-log
+  and project-state memory files (by name pattern, wherever they are),
+  works out what changed from git and/or this conversation, appends a
+  dated entry to the log and updates the state file's summary, matching
+  each file's own existing conventions. Writes directly — no go-ahead
+  needed, same reasoning as `new-branch.md`.
